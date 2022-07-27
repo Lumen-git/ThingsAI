@@ -2,7 +2,7 @@ import os
 import json
 
 
-def main():
+def makeJsonOfthings():
     #By defult, /Thigns is where all the images are stored
     path = "./Things"
     files = os.listdir(path)
@@ -15,6 +15,9 @@ def main():
     #save all_things to a json file
     with open('things.json', 'w') as fp:
         json.dump(all_things, fp, indent=4)
+
+def main():
+    makeJsonOfthings()
     
 
 if __name__ == "__main__":
