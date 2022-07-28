@@ -1,4 +1,5 @@
 from PIL import Image
+import random
 
 #I know this file name/class name doesn't fit standard naming conventions, but when you're
 #basing a project on the work "things", file names and variables get real messy real fast
@@ -49,7 +50,7 @@ class thing:
 
     def getRotation(self):
         return self.rotation
-
+        
     def __str__(self):
         return "ID: " + str(self.ID) + " scale: " + str(self.scale) + " x_position: " + str(self.x_position) + " y_position: " + str(self.y_position) + " y_size: " + str(self.y_size) + " x_size: " + str(self.x_size) + " file_path: " + str(self.file_path)
     
