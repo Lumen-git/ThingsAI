@@ -89,11 +89,11 @@ def mutate(parent_thing):
             thing_copy.y_position = 0
         if thing_copy.x_size*thing_copy.scale <= 0:
             img = Image.open(thing_copy.file_path)
-            thing_image.size[0]*thing.scale
+            img.size[0]*thing.scale
             img.close()
         if thing_copy.y_size*thing_copy.scale <= 0:
             img = Image.open(thing_copy.file_path)
-            thing_image.size[0]*thing.scale
+            img.size[0]*thing.scale
             img.close()
         thing_copy.rotation = int(thing_copy.rotation * random.uniform(.8,1.2))
         additions.insert(i, thing_copy)
