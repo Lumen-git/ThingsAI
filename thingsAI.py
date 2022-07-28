@@ -108,7 +108,7 @@ def main():
     target = Image.open("target.png")
     x_size = target.size[0]
     y_size = target.size[1]
-    canvas = Image.new("RGB", (x_size, y_size))
+    canvas = Image.new("RGBA", (x_size, y_size))
     new_image = canvas.copy()
     population = makePopulation(things_dict, x_size, y_size)
 
@@ -126,6 +126,7 @@ def main():
             for trial_thing in population:
                 canvas_copy = canvas.copy()
                 thing_image = Image.open(trial_thing.getPath())
+                thing_image = thing_image.convert("RGBA")
                 new_x = int(thing_image.size[0]*trial_thing.scale)
                 new_y = int(thing_image.size[1]*trial_thing.scale)
                 #All these checks prevent the images from going out of bounds/giving and argument pillow doesn't like
@@ -134,7 +135,6 @@ def main():
                 if new_y == 0:
                     new_y = 1
                 thing_image = thing_image.resize((new_x, new_y))
-                thing_image = thing_image.convert("RGBA")
                 thing_image = thing_image.rotate(trial_thing.rotation, expand=True)
                 canvas_copy.paste(thing_image, (trial_thing.x_position, trial_thing.y_position), mask=thing_image)
                 trial_thing.setScore(getTotalDifferenceFunctional(target, canvas_copy))
@@ -156,6 +156,9 @@ def main():
         new_image.save("product.png")
         canvas = new_image.copy()
         generation += 1
+        population = []
+        population = makePopulation(things_dict, x_size, y_size)
+
 
 
     
