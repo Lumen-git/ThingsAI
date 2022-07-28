@@ -6,15 +6,16 @@ import math
 from scipy.interpolate import interp1d
 import numpy
 from things2pickle import canThings
+from copy import deepcopy
 
 def makePopulation(thingsDict, main_x_size, main_y_size):
     print("Making population...")
     population = []
     #Generate a population of 1000 things
-    for i in range(1001):
+    for i in range(1000):
         #Choose a random image by its ID
         chosen = random.randint(1,len(thingsDict))
-        #Generate a thing from the chosen image with random scale and 
+        #Generate a thing from the chosen image with random scale and
         #offset to have selected position on the canvas be the center
         #of the thing
         size_test = Image.open(thingsDict[chosen])
@@ -29,10 +30,11 @@ def makePopulation(thingsDict, main_x_size, main_y_size):
         y_position = random.randint(0,main_y_size)
         rotation = random.randint(0,360)
         population.append(thing(scale, x_position, y_position, thingsDict[chosen], rotation, chosen))
+        size_test.close()
     return population
 
 def getTotalDifferenceVisual(image1,image2):
-    #Get the total difference between two images using euclidean distance formula
+    #Get the total difference between two images using euclidean distance formula, pixel by pixel
     ##SLOW AS ALL HELL THIS NEEDS TO BE MADE BETTER
     ##JUST USE THIS TO GENERATE A VISUAL OF THE IMAGE DIFFERENCES
     #Takes 41.2 seconds to compare two identical 1098 × 1028 images
@@ -70,10 +72,10 @@ def mutate(parent_thing):
     additions = []
     i = 0
     for i in range(3):
-        thing_copy = thing(parent_thing.getScale(), parent_thing.getXPosition(), parent_thing.getYPosition(), parent_thing.getPath(), parent_thing.getRotation())
-        thing_copy.scale = int(parent_thing.scale * random.uniform(.8,1.2))
-        thing_copy.x_position = int(parent_thing.x_position * random.uniform(.8,1.2))
-        thing_copy.y_position = int(parent_thing.y_position * random.uniform(.8,1.2))
+        thing_copy = deepcopy(parent_thing)
+        thing_copy.scale = int(thing_copy.scale * random.uniform(.8,1.2))
+        thing_copy.x_position = int(thing_copy.x_position * random.uniform(.8,1.2))
+        thing_copy.y_position = int(thing_copy.y_position * random.uniform(.8,1.2))
         #All these checks prevent the images from going out of bounds/giving and argument pillow doesn't like
         if thing_copy.x_position == 0:
             thing_copy.x_position = 1
@@ -84,17 +86,16 @@ def mutate(parent_thing):
         if thing_copy.y_position < 0:
             thing_copy.y_position = 0
         if thing_copy.x_size == 0:
-            thing_copy.x_size = parent_thing.x_size
+            thing_copy.x_size = thing_copy.x_size
         if thing_copy.y_size == 0:
-            thing_copy.y_size = parent_thing.y_size
-        thing_copy.rotation = int(parent_thing.rotation * random.uniform(.8,1.2))
+            thing_copy.y_size = thing_copy.y_size
+        thing_copy.rotation = int(thing_copy.rotation * random.uniform(.8,1.2))
         additions.insert(i, thing_copy)
         i += 1
     return additions
 
 
-def main():
-    canThings()
+def evolve():
     #read things.pickle to a dictionary
     with open('things.pickle', 'rb') as jar:
         things_dict = pickle.load(jar)
@@ -103,11 +104,10 @@ def main():
     #Evolution will happen on the a copy pf canvas, and after each
     #cycle, the canvas will be saved with the best change of that generation
     target = Image.open("target.png")
-    x_size = target.size[0]
-    y_size = target.size[1]
-    canvas = Image.new("RGBA", (x_size, y_size))
-    new_image = Image.new("RGBA", (x_size, y_size))
-    population = makePopulation(things_dict, x_size, y_size)
+    target_x = target.size[0]
+    target_y = target.size[1]
+    canvas = Image.new("RGB", (target_x, target_y))
+    population = makePopulation(things_dict, target_x, target_y)
 
     #Evolution time!
     #Enclosed in a while true loop to keep evolving until the user stops the program
@@ -127,14 +127,15 @@ def main():
                 new_x = int(thing_image.size[0]*trial_thing.scale)
                 new_y = int(thing_image.size[1]*trial_thing.scale)
                 #All these checks prevent the images from going out of bounds/giving and argument pillow doesn't like
-                if new_x == 0:
+                if new_x <= 0:
                     new_x = 1
-                if new_y == 0:
+                if new_y <= 0:
                     new_y = 1
                 thing_image = thing_image.resize((new_x, new_y))
                 thing_image = thing_image.rotate(trial_thing.rotation, expand=True)
                 canvas_copy.paste(thing_image, (trial_thing.x_position, trial_thing.y_position), mask=thing_image)
                 trial_thing.setScore(getTotalDifferenceFunctional(target, canvas_copy))
+                thing_image.close()
             #Sort the population by score
             population.sort(key=lambda x: x.getScore())
             #Take first 250 items of the population and save them in population
@@ -152,13 +153,14 @@ def main():
         thing_image = thing_image.rotate(best_thing.rotation, expand=True)
         canvas.paste(thing_image, (best_thing.x_position, best_thing.y_position), mask=thing_image)
         canvas.save("product.png")
+        thing_image.close()
         generation += 1
         population = []
-        population = makePopulation(things_dict, x_size, y_size)
+        population = makePopulation(things_dict, target_x, target_y)
 
 
 
-    
+
 
 if __name__ == "__main__":
-    main()
+    evolve()
