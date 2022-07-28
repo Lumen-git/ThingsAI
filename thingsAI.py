@@ -87,10 +87,14 @@ def mutate(parent_thing):
             thing_copy.x_position = 0
         if thing_copy.y_position < 0:
             thing_copy.y_position = 0
-        if thing_copy.x_size == 0:
-            thing_copy.x_size = thing_copy.x_size
-        if thing_copy.y_size == 0:
-            thing_copy.y_size = thing_copy.y_size
+        if thing_copy.x_size*thing_copy.scale <= 0:
+            img = Image.open(thing_copy.file_path)
+            thing_image.size[0]*thing.scale
+            img.close()
+        if thing_copy.y_size*thing_copy.scale <= 0:
+            img = Image.open(thing_copy.file_path)
+            thing_image.size[0]*thing.scale
+            img.close()
         thing_copy.rotation = int(thing_copy.rotation * random.uniform(.8,1.2))
         additions.insert(i, thing_copy)
         i += 1
@@ -159,7 +163,10 @@ def evolve():
         #Only add image if it increased the overall score of the canvas
         #Somewhat breaks evolution, but prevents program
         #from constantly undoing progress
-        if best_thing.getScore() < high_score:
+        #Using < because a lower score is better
+        #Using -2000 to give the AI a little room to undo some progress
+        #In order to make more overall
+        if best_thing.getScore() - 2000 < high_score:
             high_score = best_thing.getScore()
             thing_image = Image.open(best_thing.file_path)
             #thing_image_mask = thing_image.convert("RGBA")
