@@ -141,7 +141,7 @@ def evolve():
                 #Lower score is better (more similar to target)
                 #How close it is to the target is more important, so it has a 1.3 weight
                 #The closer the trial is to the last canvas, the less it will have its score reduced
-                trial_thing.setScore(getTotalDifferenceFunctional(target, canvas_copy)*1.3-getTotalDifferenceFunctional(previous_canvas, canvas_copy)*.4)
+                trial_thing.setScore((getTotalDifferenceFunctional(target, canvas_copy)*1.5)-(getTotalDifferenceFunctional(previous_canvas, canvas_copy)*.4))
                 thing_image.close()
             #Sort the population by score
             population.sort(key=lambda x: x.getScore())
