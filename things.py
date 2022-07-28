@@ -1,7 +1,6 @@
 import pickle
 import os
 import random
-from re import M
 from PIL import Image
 from thing import thing
 import math
@@ -19,7 +18,12 @@ def makePopulation(thingsDict, x_size, y_size):
         #Generate a thing from the chosen image with random scale and 
         #offset to have selected position on the canvas be the center
         #of the thing
-        scale = random.uniform(.5,1.5)
+        size_test = Image.open(thingsDict[chosen])
+        #Scalar prevents the images from being too small
+        #Paining pixel by pixel is cheating
+        scalar = x_size / 8
+        scaler = scalar / x_size
+        scale = random.uniform(scalar * .5, scalar * 1.5)
         x_position = random.randint(0,x_size)
         y_position = random.randint(0,y_size)
         rotation = random.randint(0,360)
@@ -125,8 +129,8 @@ def main():
                     new_y = 1
                 thing_image = thing_image.resize((new_x, new_y))
                 thing_image = thing_image.rotate(trial_thing.rotation, expand=True)
-                thing_image_mask = thing_image.convert("RGBA")
-                canvas_copy.paste(thing_image, (trial_thing.x_position, trial_thing.y_position), mask=thing_image_mask)
+                thing_image = thing_image.convert("RGBA")
+                canvas_copy.paste(thing_image, (trial_thing.x_position, trial_thing.y_position), mask=thing_image)
                 trial_thing.setScore(getTotalDifferenceFunctional(target, canvas_copy))
             #Sort the population by score
             population.sort(key=lambda x: x.getScore())
