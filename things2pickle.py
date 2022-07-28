@@ -7,16 +7,16 @@ def canThings():
     path = "./Things"
     files = os.listdir(path)
     #Create dictionary giving each item an ID
-    allThings = {}
+    all_things = {}
     i = 1
     for item in files:
-        allThings[i] = "/Things/" + item
+        all_things[i] = "Things/" + item
         i += 1
-    #save all_things to a json file
-    print(allThings)
-    input()
+    #save all_things to a pickle file
+    #print(all_things)
+    #input()
     with open('things.pickle', 'wb') as jar:
-        pickle.dump(allThings, jar)
+        pickle.dump(all_things, jar)
 
 
 def main():
