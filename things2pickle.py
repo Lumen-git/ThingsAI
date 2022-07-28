@@ -10,8 +10,10 @@ def canThings():
     all_things = {}
     i = 1
     for item in files:
-        all_things[i] = "Things/" + item
-        i += 1
+        #This line means nothing on windows, but helps keep the mac filesytem files out of there
+        if item != ".DS_Store":
+            all_things[i] = "Things/" + item
+            i += 1
     #save all_things to a pickle file
     #print(all_things)
     #input()
