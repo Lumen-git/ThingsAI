@@ -1,15 +1,13 @@
 import pickle
-import os
 import random
 from PIL import Image
 from thingClass import thing
 import math
 from scipy.interpolate import interp1d
 import numpy
-import time
 from things2pickle import canThings
 
-def makePopulation(thingsDict, x_size, y_size):
+def makePopulation(thingsDict, main_x_size, main_y_size):
     print("Making population...")
     population = []
     #Generate a population of 1000 things
@@ -24,11 +22,11 @@ def makePopulation(thingsDict, x_size, y_size):
         #Paining pixel by pixel is cheating
         #The things are now based on 1/8 the size of the full image (based on x axis), then adjusted
         #to their unique item size
-        scalar = x_size / 8
+        scalar = main_x_size / 8
         scaler = scalar / size_test.size[0]
         scale = random.uniform(scalar * .5, scalar * 1.5)
-        x_position = random.randint(0,x_size)
-        y_position = random.randint(0,y_size)
+        x_position = random.randint(0,main_x_size)
+        y_position = random.randint(0,main_y_size)
         rotation = random.randint(0,360)
         population.append(thing(scale, x_position, y_position, thingsDict[chosen], rotation, chosen))
     return population
@@ -102,14 +100,13 @@ def main():
         things_dict = pickle.load(jar)
     #Open target image and make a new canvas of same size
     #then copy it as new_image
-    #Evolution will happen on the canvas, and after each
-    #cycle, the canvas will be copied to the new_image
-    #new image is the final result
+    #Evolution will happen on the a copy pf canvas, and after each
+    #cycle, the canvas will be saved with the best change of that generation
     target = Image.open("target.png")
     x_size = target.size[0]
     y_size = target.size[1]
     canvas = Image.new("RGBA", (x_size, y_size))
-    new_image = canvas.copy()
+    new_image = Image.new("RGBA", (x_size, y_size))
     population = makePopulation(things_dict, x_size, y_size)
 
     #Evolution time!
@@ -147,14 +144,14 @@ def main():
                 child = mutate(thing)
                 new_population.extend(child)
             population.extend(new_population)
-        thing = population[0]
-        thing_image = Image.open(thing.file_path)
-        thing_image = thing_image.resize((int(thing_image.size[0]*thing.scale), int(thing_image.size[1]*thing.scale)))
-        thing_image = thing_image.rotate(thing.rotation, expand=True)
-        thing_image_mask = thing_image.convert("RGBA")
-        new_image.paste(thing_image, (thing.x_position, thing.y_position), mask=thing_image_mask)
-        new_image.save("product.png")
-        canvas = new_image.copy()
+        best_thing = population[0]
+        thing_image = Image.open(best_thing.file_path)
+        #thing_image_mask = thing_image.convert("RGBA")
+        thing_image = thing_image.convert("RGBA")
+        thing_image = thing_image.resize((int(thing_image.size[0]*best_thing.scale), int(thing_image.size[1]*best_thing.scale)))
+        thing_image = thing_image.rotate(best_thing.rotation, expand=True)
+        canvas.paste(thing_image, (best_thing.x_position, best_thing.y_position), mask=thing_image)
+        canvas.save("product.png")
         generation += 1
         population = []
         population = makePopulation(things_dict, x_size, y_size)
