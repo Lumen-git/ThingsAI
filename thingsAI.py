@@ -22,10 +22,10 @@ def makePopulation(thingsDict, x_size, y_size):
         size_test = Image.open(thingsDict[chosen])
         #Scalar prevents the images from being too small
         #Paining pixel by pixel is cheating
-        #The things are now based on 1/8 the size of the full image, then adjusted
+        #The things are now based on 1/8 the size of the full image (based on x axis), then adjusted
         #to their unique item size
         scalar = x_size / 8
-        scaler = scalar / x_size
+        scaler = scalar / size_test.size[0]
         scale = random.uniform(scalar * .5, scalar * 1.5)
         x_position = random.randint(0,x_size)
         y_position = random.randint(0,y_size)
@@ -134,8 +134,8 @@ def main():
                 if new_y == 0:
                     new_y = 1
                 thing_image = thing_image.resize((new_x, new_y))
-                thing_image = thing_image.rotate(trial_thing.rotation, expand=True)
                 thing_image = thing_image.convert("RGBA")
+                thing_image = thing_image.rotate(trial_thing.rotation, expand=True)
                 canvas_copy.paste(thing_image, (trial_thing.x_position, trial_thing.y_position), mask=thing_image)
                 trial_thing.setScore(getTotalDifferenceFunctional(target, canvas_copy))
             #Sort the population by score
