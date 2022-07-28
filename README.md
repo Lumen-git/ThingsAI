@@ -1,4 +1,5 @@
 # ThingsAI
+### Using evolution to make an image out of things!
 
 ### Requirements
 Most of the requirements come with python or will already be installed in most conda environments, however, all non-standard ones are listed below.
@@ -16,4 +17,4 @@ numpy
 
 ### How it works
 
-## To-Do
+### To-Do
