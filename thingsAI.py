@@ -171,10 +171,14 @@ def evolve():
             thing_image = Image.open(best_thing.file_path)
             #thing_image_mask = thing_image.convert("RGBA")
             thing_image = thing_image.convert("RGBA")
-            thing_image = thing_image.resize((int(thing_image.size[0]*best_thing.scale), int(thing_image.size[1]*best_thing.scale)))
-            thing_image = thing_image.rotate(best_thing.rotation, expand=True)
-            canvas.paste(thing_image, (best_thing.x_position, best_thing.y_position), mask=thing_image)
-            canvas.save("product.png")
+            paste_x_size = int(thing_image.size[0]*best_thing.scale)
+            paste_y_size = int(thing_image.size[1]*best_thing.scale)
+            #A bit of a quick fix to prevent pasting/resizing an image less than 0 size, but it'll work for now
+            if paste_x_size > 0 and paste_y_size > 0:
+                thing_image = thing_image.resize((paste_x_size, paste_y_size))
+                thing_image = thing_image.rotate(best_thing.rotation, expand=True)
+                canvas.paste(thing_image, (best_thing.x_position, best_thing.y_position), mask=thing_image)
+                canvas.save("product.png")
             previous_canvas = canvas.copy()
             thing_image.close()
             generation += 1
