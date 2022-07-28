@@ -109,6 +109,7 @@ def evolve():
     target_x = target.size[0]
     target_y = target.size[1]
     canvas = Image.new("RGB", (target_x, target_y))
+    previous_canvas = Image.new("RGB", (target_x, target_y))
     population = makePopulation(things_dict, target_x, target_y)
 
     #Evolution time!
@@ -136,7 +137,11 @@ def evolve():
                 thing_image = thing_image.resize((new_x, new_y))
                 thing_image = thing_image.rotate(trial_thing.rotation, expand=True)
                 canvas_copy.paste(thing_image, (trial_thing.x_position, trial_thing.y_position), mask=thing_image)
-                trial_thing.setScore(getTotalDifferenceFunctional(target, canvas_copy))
+                #Score is calculated by comparing the canvas_copy to the target image and the last canvas
+                #Lower score is better (more similar to target)
+                #How close it is to the target is more important, so it has a 1.3 weight
+                #The closer the trial is to the last canvas, the less it will have its score reduced
+                trial_thing.setScore(getTotalDifferenceFunctional(target, canvas_copy)*1.3-getTotalDifferenceFunctional(previous_canvas, canvas_copy)*.4)
                 thing_image.close()
             #Sort the population by score
             population.sort(key=lambda x: x.getScore())
@@ -155,6 +160,7 @@ def evolve():
         thing_image = thing_image.rotate(best_thing.rotation, expand=True)
         canvas.paste(thing_image, (best_thing.x_position, best_thing.y_position), mask=thing_image)
         canvas.save("product.png")
+        previous_canvas = canvas.copy()
         thing_image.close()
         generation += 1
         population = []
