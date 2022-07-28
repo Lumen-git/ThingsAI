@@ -2,7 +2,7 @@ import pickle
 import os
 import random
 from PIL import Image
-from thing import thing
+from thingClass import thing
 import math
 from scipy.interpolate import interp1d
 import numpy

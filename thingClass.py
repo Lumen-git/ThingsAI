@@ -1,4 +1,7 @@
 from PIL import Image
+
+#I know this file name/class name doesn't fit standard naming conventions, but when you're
+#basing a project on the work "things", file names and variables get real messy real fast
 class thing:
     """class with ID, scale, x_position, y_position, y_size, x_size, rotation, and file_path"""
     def __init__(self, scale, x_position, y_position, file_path, rotation, ID=0):
