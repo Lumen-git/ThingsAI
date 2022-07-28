@@ -111,6 +111,7 @@ def evolve():
     canvas = Image.new("RGB", (target_x, target_y))
     previous_canvas = Image.new("RGB", (target_x, target_y))
     population = makePopulation(things_dict, target_x, target_y)
+    high_score = getTotalDifferenceFunctional(target, canvas)
 
     #Evolution time!
     #Enclosed in a while true loop to keep evolving until the user stops the program
@@ -141,7 +142,9 @@ def evolve():
                 #Lower score is better (more similar to target)
                 #How close it is to the target is more important, so it has a 1.3 weight
                 #The closer the trial is to the last canvas, the less it will have its score reduced
-                trial_thing.setScore((getTotalDifferenceFunctional(target, canvas_copy)*1.5)-(getTotalDifferenceFunctional(previous_canvas, canvas_copy)*.4))
+                #Without this, a low scoring item that still has the hishhest score of the generation
+                #Can cover the while image and ruin all progress
+                trial_thing.setScore(getTotalDifferenceFunctional(target, canvas_copy))
                 thing_image.close()
             #Sort the population by score
             population.sort(key=lambda x: x.getScore())
@@ -153,16 +156,23 @@ def evolve():
                 new_population.extend(child)
             population.extend(new_population)
         best_thing = population[0]
-        thing_image = Image.open(best_thing.file_path)
-        #thing_image_mask = thing_image.convert("RGBA")
-        thing_image = thing_image.convert("RGBA")
-        thing_image = thing_image.resize((int(thing_image.size[0]*best_thing.scale), int(thing_image.size[1]*best_thing.scale)))
-        thing_image = thing_image.rotate(best_thing.rotation, expand=True)
-        canvas.paste(thing_image, (best_thing.x_position, best_thing.y_position), mask=thing_image)
-        canvas.save("product.png")
-        previous_canvas = canvas.copy()
-        thing_image.close()
-        generation += 1
+        #Only add image if it increased the overall score of the canvas
+        #Somewhat breaks evolution, but prevents program
+        #from constantly undoing progress
+        if best_thing.getScore() < high_score:
+            high_score = best_thing.getScore()
+            thing_image = Image.open(best_thing.file_path)
+            #thing_image_mask = thing_image.convert("RGBA")
+            thing_image = thing_image.convert("RGBA")
+            thing_image = thing_image.resize((int(thing_image.size[0]*best_thing.scale), int(thing_image.size[1]*best_thing.scale)))
+            thing_image = thing_image.rotate(best_thing.rotation, expand=True)
+            canvas.paste(thing_image, (best_thing.x_position, best_thing.y_position), mask=thing_image)
+            canvas.save("product.png")
+            previous_canvas = canvas.copy()
+            thing_image.close()
+            generation += 1
+        else:
+            generation += 1
         population = []
         population = makePopulation(things_dict, target_x, target_y)
 
