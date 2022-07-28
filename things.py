@@ -7,6 +7,7 @@ import math
 from scipy.interpolate import interp1d
 import numpy
 import time
+from things2pickle import canThings
 
 def makePopulation(thingsDict, x_size, y_size):
     print("Making population...")
@@ -21,6 +22,8 @@ def makePopulation(thingsDict, x_size, y_size):
         size_test = Image.open(thingsDict[chosen])
         #Scalar prevents the images from being too small
         #Paining pixel by pixel is cheating
+        #The things are now based on 1/8 the size of the full image, then adjusted
+        #to their unique item size
         scalar = x_size / 8
         scaler = scalar / x_size
         scale = random.uniform(scalar * .5, scalar * 1.5)
@@ -73,6 +76,7 @@ def mutate(parent_thing):
         thing_copy.scale = int(parent_thing.scale * random.uniform(.8,1.2))
         thing_copy.x_position = int(parent_thing.x_position * random.uniform(.8,1.2))
         thing_copy.y_position = int(parent_thing.y_position * random.uniform(.8,1.2))
+        #All these checks prevent the images from going out of bounds/giving and argument pillow doesn't like
         if thing_copy.x_position == 0:
             thing_copy.x_position = 1
         if thing_copy.y_position == 0:
@@ -92,7 +96,8 @@ def mutate(parent_thing):
 
 
 def main():
-    #read things.json to a dictionary
+    canThings()
+    #read things.pickle to a dictionary
     with open('things.pickle', 'rb') as jar:
         things_dict = pickle.load(jar)
     #Open target image and make a new canvas of same size
@@ -123,6 +128,7 @@ def main():
                 thing_image = Image.open(trial_thing.getPath())
                 new_x = int(thing_image.size[0]*trial_thing.scale)
                 new_y = int(thing_image.size[1]*trial_thing.scale)
+                #All these checks prevent the images from going out of bounds/giving and argument pillow doesn't like
                 if new_x == 0:
                     new_x = 1
                 if new_y == 0:
