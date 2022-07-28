@@ -25,7 +25,7 @@ def makePopulation(thingsDict, main_x_size, main_y_size):
         #to their unique item size
         #scalar = main_x_size / 8
         #scaler = scalar / size_test.size[0]
-        scale = random.uniform(.6, 1.4)
+        scale = random.uniform(.4, 1.6)
         x_position = random.randint(0,main_x_size)
         y_position = random.randint(0,main_y_size)
         rotation = random.randint(0,360)
@@ -73,7 +73,7 @@ def mutate(parent_thing):
     i = 0
     for i in range(3):
         thing_copy = deepcopy(parent_thing)
-        thing_copy.scale = int(thing_copy.scale * random.uniform(.8,1.2))
+        thing_copy.scale = int(thing_copy.scale * random.uniform(.6,1.4))
         thing_copy.x_position = int(thing_copy.x_position * random.uniform(.8,1.2))
         thing_copy.y_position = int(thing_copy.y_position * random.uniform(.8,1.2))
         #All these checks prevent the images from going out of bounds/giving and argument pillow doesn't like
