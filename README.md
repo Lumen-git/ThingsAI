@@ -1,5 +1,4 @@
 # ThingsAI
-### Using evolution to make an image out of things!
 
 ### Requirements
 Most of the requirements come with python or will already be installed in most conda environments, however, all non-standard ones are listed below.
@@ -17,4 +16,10 @@ numpy
 
 ### How it works
 
-### To-Do
+## To-Do
+
+[ ] Speed up image processing (right now 500x500 seems to be the effective limit)
+[ ] Color average mode: Select random spot and size, only select image from population with similar cover average. Possible new mutation point
+    ^^ Would require color information to be preprocessed by image2pickle and stored in Thing object
+[ ] Minimum size mode: Sets a minimum size of the "thing" image, either as px or percent of full image
+[ ] Menu system to change settings, launch program, index images...
