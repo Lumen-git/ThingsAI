@@ -5,7 +5,7 @@ import random
 #basing a project on the work "things", file names and variables get real messy real fast
 class thing:
     """class with ID, scale, x_position, y_position, y_size, x_size, rotation, and file_path"""
-    def __init__(self, scale, x_position, y_position, file_path, rotation, ID=0):
+    def __init__(self, scale, x_position, y_position, file_path, rotation, smallest_scale,ID=0):
         self.ID = ID
         self.scale = scale
         self.y_size = Image.open(file_path).size[1]
@@ -17,6 +17,7 @@ class thing:
         self.y_position = y_position - y_offset
         score = 0
         self.rotation = rotation
+        self.smallest_scale = smallest_scale
 
     def getPath(self):
         return self.file_path
@@ -50,6 +51,9 @@ class thing:
 
     def getRotation(self):
         return self.rotation
+
+    def getSmallestScale(self):
+        return self.smallest_scale
         
     def __str__(self):
         return "ID: " + str(self.ID) + " scale: " + str(self.scale) + " x_position: " + str(self.x_position) + " y_position: " + str(self.y_position) + " y_size: " + str(self.y_size) + " x_size: " + str(self.x_size) + " file_path: " + str(self.file_path)

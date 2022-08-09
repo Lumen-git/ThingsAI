@@ -20,19 +20,17 @@ def makePopulation(thingsDict, main_x_size, main_y_size, settings_bundle):
         #Generate a thing from the chosen image with random scale and
         #offset to have selected position on the canvas be the center
         #of the thing
-        size_test = Image.open(thingsDict[chosen])
-        #Scalar prevents the images from being too small
-        #Paining pixel by pixel is cheating
-        #The things are now based on 1/8 the size of the full image (based on x axis), then adjusted
-        #to their unique item size
-        #scalar = main_x_size / 8
-        #scaler = scalar / size_test.size[0]
+        if settings_bundle[0]:
+            smallest_scale = max(main_x_size*settings_bundle[1]/thingsDict[chosen].x_size, main_y_size*settings_bundle[1]/thingsDict[chosen].y_size)
+        else:
+            smallest_scale = .05
         scale = random.uniform(.4, 1.6)
+        if scale < smallest_scale:
+            scale = smallest_scale
         x_position = random.randint(0,main_x_size)
         y_position = random.randint(0,main_y_size)
         rotation = random.randint(0,360)
-        population.append(thing(scale, x_position, y_position, thingsDict[chosen], rotation, chosen))
-        size_test.close()
+        population.append(thing(scale, x_position, y_position, thingsDict[chosen], rotation, smallest_scale, chosen))
     return population
 
 def getTotalDifferenceVisual(image1,image2):
@@ -89,6 +87,12 @@ def mutate(parent_thing, settings_bundle, rate):
             thing_copy.x_position = 0
         if thing_copy.y_position < 0:
             thing_copy.y_position = 0
+        #If minimum scale is enabled, make sure the scale is at least the minimum scale
+        if settings_bundle[0]:
+            smallest_scale = thing_copy.smallest_scale
+            if thing_copy.scale < smallest_scale:
+                thing_copy.scale = smallest_scale
+        #Make sure the scale doesn't make the image 0
         if thing_copy.x_size*thing_copy.scale <= 0:
             img = Image.open(thing_copy.file_path)
             img.size[0]*thing.scale
@@ -180,7 +184,6 @@ def evolve(settings):
                 thing_image = thing_image.rotate(best_thing.rotation, expand=True)
                 canvas.paste(thing_image, (best_thing.x_position, best_thing.y_position), mask=thing_image)
                 canvas.save("product.png")
-            previous_canvas = canvas.copy()
             thing_image.close()
             generation += 1
         else:
