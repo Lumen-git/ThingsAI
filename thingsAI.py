@@ -22,11 +22,10 @@ def makePopulation(thingsDict, main_x_size, main_y_size, settings_bundle):
         #of the thing
         if settings_bundle[0]:
             smallest_scale = max(main_x_size*settings_bundle[1]/thingsDict[chosen].x_size, main_y_size*settings_bundle[1]/thingsDict[chosen].y_size)
+            scale = random.uniform(smallest_scale, smallest_scale + 1.2)
         else:
             smallest_scale = .05
-        scale = random.uniform(.4, 1.6)
-        if scale < smallest_scale:
-            scale = smallest_scale
+            scale = random.uniform(.4,1.6)
         x_position = random.randint(0,main_x_size)
         y_position = random.randint(0,main_y_size)
         rotation = random.randint(0,360)
