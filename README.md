@@ -21,5 +21,5 @@ numpy
 - [ ] Speed up image processing (right now 500x500 seems to be the effective limit)
 - [ ] Color average mode: Select random spot and size, only select image from population with similar cover average. Possible new mutation point
     ^^ Would require color information to be preprocessed by image2pickle and stored in Thing object
-- [ ] Minimum size mode: Sets a minimum size of the "thing" image, either as px or percent of full image
+- [X] Minimum size mode: Sets a minimum size of the "thing" image, either as px or percent of full image
 - [ ] Menu system to change settings, launch program, index images...
