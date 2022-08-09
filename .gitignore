@@ -5,3 +5,4 @@ things.pickle
 target.png
 Things/
 product.png
+*.pyc

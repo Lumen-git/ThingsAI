@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import pickle
 import random
 from PIL import Image
@@ -7,8 +8,9 @@ from scipy.interpolate import interp1d
 import numpy
 from things2pickle import canThings
 from copy import deepcopy
+import json
 
-def makePopulation(thingsDict, main_x_size, main_y_size):
+def makePopulation(thingsDict, main_x_size, main_y_size, settings_bundle):
     print("Making population...")
     population = []
     #Generate a population of 1000 things
@@ -37,7 +39,7 @@ def getTotalDifferenceVisual(image1,image2):
     #Get the total difference between two images using euclidean distance formula, pixel by pixel
     ##SLOW AS ALL HELL THIS NEEDS TO BE MADE BETTER
     ##JUST USE THIS TO GENERATE A VISUAL OF THE IMAGE DIFFERENCES
-    #Takes 41.2 seconds to compare two identical 1098 × 1028 images
+    #Takes 41.2 seconds to compare two identical 1098 x 1028 images
     m = interp1d([0,442],[0,255])
     x_size=image1.size[0]
     y_size=image1.size[1]
@@ -57,17 +59,17 @@ def getTotalDifferenceFunctional(image1,image2):
     #Get the total difference between two images using numpy
     #This is faster than the previous method by a long shot
     #Amazing how different packages and do the same thing with such different speeds
-    #Takes .2 seconds to compare two identical 1098 × 1028 images
+    #Takes .2 seconds to compare two identical 1098 x 1028 images
     #Convert the images to numpy arrays
     image1 = image1.convert("RGB")
     image2 = image2.convert("RGB")
     image1 = numpy.asarray(image1)
     image2 = numpy.asarray(image2)
-    #Aparrently this does the euclidian difference formula
+    #Apparently this does the euclidean difference formula
     differences = numpy.linalg.norm(image1 - image2)
     return differences
 
-def mutate(parent_thing):
+def mutate(parent_thing, settings_bundle):
     #Mutate a thing by changing its scale, position, and rotation by 80% to 120%
     additions = []
     i = 0
@@ -101,10 +103,14 @@ def mutate(parent_thing):
     return additions
 
 
-def evolve():
+def evolve(settings):
     #read things.pickle to a dictionary
     with open('things.pickle', 'rb') as jar:
         things_dict = pickle.load(jar)
+    
+    #Make a tuple of the settings required for pop gen and mutation
+    size_settings = (settings["MinSizeMode"], settings["MinSize"])
+
     #Open target image and make a new canvas of same size
     #then copy it as new_image
     #Evolution will happen on the a copy pf canvas, and after each
@@ -113,8 +119,7 @@ def evolve():
     target_x = target.size[0]
     target_y = target.size[1]
     canvas = Image.new("RGB", (target_x, target_y))
-    previous_canvas = Image.new("RGB", (target_x, target_y))
-    population = makePopulation(things_dict, target_x, target_y)
+    population = makePopulation(things_dict, target_x, target_y, size_settings)
     high_score = getTotalDifferenceFunctional(target, canvas)
 
     #Evolution time!
@@ -144,10 +149,6 @@ def evolve():
                 canvas_copy.paste(thing_image, (trial_thing.x_position, trial_thing.y_position), mask=thing_image)
                 #Score is calculated by comparing the canvas_copy to the target image and the last canvas
                 #Lower score is better (more similar to target)
-                #How close it is to the target is more important, so it has a 1.3 weight
-                #The closer the trial is to the last canvas, the less it will have its score reduced
-                #Without this, a low scoring item that still has the hishhest score of the generation
-                #Can cover the while image and ruin all progress
                 trial_thing.setScore(getTotalDifferenceFunctional(target, canvas_copy))
                 thing_image.close()
             #Sort the population by score
@@ -156,7 +157,7 @@ def evolve():
             population = population[:250]
             new_population = []
             for thing in population:
-                child = mutate(thing)
+                child = mutate(thing, size_settings)
                 new_population.extend(child)
             population.extend(new_population)
         best_thing = population[0]
@@ -185,11 +186,13 @@ def evolve():
         else:
             generation += 1
         population = []
-        population = makePopulation(things_dict, target_x, target_y)
+        population = makePopulation(things_dict, target_x, target_y, size_settings)
 
 
 
 
 
 if __name__ == "__main__":
-    evolve()
+    with open('config.json') as settings:
+        config = json.load(settings)
+    evolve(config)

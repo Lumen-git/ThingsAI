@@ -1,6 +1,5 @@
 {
-    "ColorAvgMode": "False",
-    "MinSizeMode": "False"
-    "MinSize": '0'
-    "MinSizeUnit" = "px"
+"ColorAvgMode": "False",
+"MinSizeMode": "False",
+"MinSize": "10"
 }
