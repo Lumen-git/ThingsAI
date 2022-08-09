@@ -1,5 +1,6 @@
 {
 "ColorAvgMode": "False",
 "MinSizeMode": "False",
-"MinSize": "10"
+"MinSize": "10",
+"MutationRate": "0.3"
 }

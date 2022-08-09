@@ -69,18 +69,18 @@ def getTotalDifferenceFunctional(image1,image2):
     differences = numpy.linalg.norm(image1 - image2)
     return differences
 
-def mutate(parent_thing, settings_bundle):
+def mutate(parent_thing, settings_bundle, rate):
     #Mutate a thing by changing its scale, position, and rotation by 80% to 120%
     additions = []
     i = 0
     for i in range(3):
         thing_copy = deepcopy(parent_thing)
+        #Mutations
         thing_copy.scale = int(thing_copy.scale * random.uniform(.6,1.4))
         thing_copy.x_position = int(thing_copy.x_position * random.uniform(.8,1.2))
         thing_copy.y_position = int(thing_copy.y_position * random.uniform(.8,1.2))
+        thing_copy.rotation = int(thing_copy.rotation * random.uniform(.8,1.2))
         #All these checks prevent the images from going out of bounds/giving and argument pillow doesn't like
-        if thing_copy.scale <= .1:
-            thing_copy.scale = .1
         if thing_copy.x_position == 0:
             thing_copy.x_position = 1
         if thing_copy.y_position == 0:
@@ -97,7 +97,6 @@ def mutate(parent_thing, settings_bundle):
             img = Image.open(thing_copy.file_path)
             img.size[0]*thing.scale
             img.close()
-        thing_copy.rotation = int(thing_copy.rotation * random.uniform(.8,1.2))
         additions.insert(i, thing_copy)
         i += 1
     return additions
@@ -110,6 +109,7 @@ def evolve(settings):
     
     #Make a tuple of the settings required for pop gen and mutation
     size_settings = (settings["MinSizeMode"], settings["MinSize"])
+    mutation_rate = settings["MutationRate"]
 
     #Open target image and make a new canvas of same size
     #then copy it as new_image
@@ -157,7 +157,7 @@ def evolve(settings):
             population = population[:250]
             new_population = []
             for thing in population:
-                child = mutate(thing, size_settings)
+                child = mutate(thing, size_settings, mutation_rate)
                 new_population.extend(child)
             population.extend(new_population)
         best_thing = population[0]
