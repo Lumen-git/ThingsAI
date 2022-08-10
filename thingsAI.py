@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import pickle
 import random
 from PIL import Image
@@ -21,10 +20,14 @@ def makePopulation(thingsDict, main_x_size, main_y_size, settings_bundle):
         #offset to have selected position on the canvas be the center
         #of the thing
         if settings_bundle[0]:
-            smallest_scale = max(main_x_size*settings_bundle[1]/thingsDict[chosen].x_size, main_y_size*settings_bundle[1]/thingsDict[chosen].y_size)
+            trial_image = Image.open(thingsDict[chosen])
+            trial_x = trial_image.size[0]
+            trial_y = trial_image.size[1]
+            trial_image.close()
+            smallest_scale = max(main_x_size*float(settings_bundle[1])/trial_x, main_y_size*float(settings_bundle[1])/trial_y)
             scale = random.uniform(smallest_scale, smallest_scale + 1.2)
         else:
-            smallest_scale = .05
+            smallest_scale = .0005
             scale = random.uniform(.4,1.6)
         x_position = random.randint(0,main_x_size)
         y_position = random.randint(0,main_y_size)
@@ -36,7 +39,6 @@ def getTotalDifferenceVisual(image1,image2):
     #Get the total difference between two images using euclidean distance formula, pixel by pixel
     ##SLOW AS ALL HELL THIS NEEDS TO BE MADE BETTER
     ##JUST USE THIS TO GENERATE A VISUAL OF THE IMAGE DIFFERENCES
-    #Takes 41.2 seconds to compare two identical 1098 x 1028 images
     m = interp1d([0,442],[0,255])
     x_size=image1.size[0]
     y_size=image1.size[1]
@@ -56,7 +58,6 @@ def getTotalDifferenceFunctional(image1,image2):
     #Get the total difference between two images using numpy
     #This is faster than the previous method by a long shot
     #Amazing how different packages and do the same thing with such different speeds
-    #Takes .2 seconds to compare two identical 1098 x 1028 images
     #Convert the images to numpy arrays
     image1 = image1.convert("RGB")
     image2 = image2.convert("RGB")
