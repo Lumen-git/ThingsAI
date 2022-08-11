@@ -13,7 +13,7 @@ def makePopulation(thingsDict, main_x_size, main_y_size, settings_bundle):
     print("Making population...")
     population = []
     #Generate a population of 1000 things
-    for i in range(1000):
+    for i in range(settings_bundle[2]):
         #Choose a random image by its ID
         chosen = random.randint(1,len(thingsDict))
         #Generate a thing from the chosen image with random scale and
@@ -39,6 +39,7 @@ def getTotalDifferenceVisual(image1,image2):
     #Get the total difference between two images using euclidean distance formula, pixel by pixel
     ##SLOW AS ALL HELL THIS NEEDS TO BE MADE BETTER
     ##JUST USE THIS TO GENERATE A VISUAL OF THE IMAGE DIFFERENCES
+    ##206 times slower than getTotalDifferenceFunctional
     m = interp1d([0,442],[0,255])
     x_size=image1.size[0]
     y_size=image1.size[1]
@@ -59,6 +60,7 @@ def getTotalDifferenceFunctional(image1,image2):
     #This is faster than the previous method by a long shot
     #Amazing how different packages and do the same thing with such different speeds
     #Convert the images to numpy arrays
+    #206 times faster than getTotalDifferenceVisual
     image1 = image1.convert("RGB")
     image2 = image2.convert("RGB")
     image1 = numpy.asarray(image1)
@@ -71,39 +73,40 @@ def mutate(parent_thing, settings_bundle, rate):
     #Mutate a thing by changing its scale, position, and rotation by 80% to 120%
     additions = []
     i = 0
-    for i in range(3):
-        thing_copy = deepcopy(parent_thing)
-        #Mutations
+    thing_copy = deepcopy(parent_thing)
+    #Mutations
+    if random.uniform(0,1) <= rate: 
         thing_copy.scale = int(thing_copy.scale * random.uniform(.6,1.4))
+    if random.uniform(0,1) <= rate:
         thing_copy.x_position = int(thing_copy.x_position * random.uniform(.8,1.2))
+    if random.uniform(0,1) <= rate:
         thing_copy.y_position = int(thing_copy.y_position * random.uniform(.8,1.2))
+    if random.uniform(0,1) <= rate:
         thing_copy.rotation = int(thing_copy.rotation * random.uniform(.8,1.2))
-        #All these checks prevent the images from going out of bounds/giving and argument pillow doesn't like
-        if thing_copy.x_position == 0:
-            thing_copy.x_position = 1
-        if thing_copy.y_position == 0:
-            thing_copy.y_position = 1
-        if thing_copy.x_position < 0:
-            thing_copy.x_position = 0
-        if thing_copy.y_position < 0:
-            thing_copy.y_position = 0
-        #If minimum scale is enabled, make sure the scale is at least the minimum scale
-        if settings_bundle[0]:
-            smallest_scale = thing_copy.smallest_scale
-            if thing_copy.scale < smallest_scale:
-                thing_copy.scale = smallest_scale
-        #Make sure the scale doesn't make the image 0
-        if thing_copy.x_size*thing_copy.scale <= 0:
-            img = Image.open(thing_copy.file_path)
-            img.size[0]*thing.scale
-            img.close()
-        if thing_copy.y_size*thing_copy.scale <= 0:
-            img = Image.open(thing_copy.file_path)
-            img.size[0]*thing.scale
-            img.close()
-        additions.insert(i, thing_copy)
-        i += 1
-    return additions
+    #All these checks prevent the images from going out of bounds/giving and argument pillow doesn't like
+    if thing_copy.x_position == 0:
+        thing_copy.x_position = 1
+    if thing_copy.y_position == 0:
+        thing_copy.y_position = 1
+    if thing_copy.x_position < 0:
+        thing_copy.x_position = 0
+    if thing_copy.y_position < 0:
+        thing_copy.y_position = 0
+    #If minimum scale is enabled, make sure the scale is at least the minimum scale
+    if settings_bundle[0]:
+        smallest_scale = thing_copy.smallest_scale
+        if thing_copy.scale < smallest_scale:
+            thing_copy.scale = smallest_scale
+    #Make sure the scale doesn't make the image 0
+    if thing_copy.x_size*thing_copy.scale <= 0:
+        img = Image.open(thing_copy.file_path)
+        img.size[0]*thing.scale
+        img.close()
+    if thing_copy.y_size*thing_copy.scale <= 0:
+        img = Image.open(thing_copy.file_path)
+        img.size[0]*thing.scale
+        img.close() 
+    return thing_copy
 
 
 def evolve():
@@ -117,7 +120,7 @@ def evolve():
         things_dict = pickle.load(jar)
     
     #Make a tuple of the settings required for pop gen and mutation
-    population_settings = (settings["MinSizeMode"], settings["MinSize"])
+    population_settings = (settings["MinSizeMode"], settings["MinSize"], settings["PopulationSize"])
     mutation_settings = settings["MutationRate"]
 
     #Open target image and make a new canvas of same size
@@ -140,8 +143,8 @@ def evolve():
     generation = 0
     print("Starting evolution...")
     while True:
-        for i in range(10):
-            print("Generation: " + str(generation) + " Loop: " + str(i))
+        for i in range(settings["GenerationCycles"]):
+            print("Generation: " + str(generation) + " Cycle: " + str(i))
             for trial_thing in population:
                 canvas_copy = canvas.copy()
                 thing_image = Image.open(trial_thing.getPath())
@@ -162,12 +165,15 @@ def evolve():
                 thing_image.close()
             #Sort the population by score
             population.sort(key=lambda x: x.getScore())
-            #Take first 250 items of the population and save them in population
-            population = population[:250]
+            #Take first percentage items of the population based on SurvivalRate and save them in population
+            population = population[:len(population)*settings["SurvivalRate"]]
             new_population = []
             for thing in population:
-                child = mutate(thing, population_settings, mutation_settings)
-                new_population.extend(child)
+                #Certain values of SurvivalRate can cause the population to decrease in size
+                #Its best to use a percentage where 1/SurvivalRate is a whole number
+                for i in range(int(1/settings["SurvivalRate"])-1):
+                    child = mutate(thing, population_settings, mutation_settings)
+                    new_population.append(child)
             population.extend(new_population)
         best_thing = population[0]
         #Only add image if it increased the overall score of the canvas
@@ -195,10 +201,6 @@ def evolve():
             generation += 1
         population = []
         population = makePopulation(things_dict, target_x, target_y, population_settings)
-
-
-
-
 
 if __name__ == "__main__":
     evolve()
