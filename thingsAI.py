@@ -106,14 +106,19 @@ def mutate(parent_thing, settings_bundle, rate):
     return additions
 
 
-def evolve(settings):
+def evolve():
+    #Load in settings
+    with open('config.json') as configFile:
+        settings = json.load(configFile)
+    configFile.close()
+
     #read things.pickle to a dictionary
     with open('things.pickle', 'rb') as jar:
         things_dict = pickle.load(jar)
     
     #Make a tuple of the settings required for pop gen and mutation
-    size_settings = (settings["MinSizeMode"], settings["MinSize"])
-    mutation_rate = settings["MutationRate"]
+    population_settings = (settings["MinSizeMode"], settings["MinSize"])
+    mutation_settings = settings["MutationRate"]
 
     #Open target image and make a new canvas of same size
     #then copy it as new_image
@@ -123,7 +128,7 @@ def evolve(settings):
     target_x = target.size[0]
     target_y = target.size[1]
     canvas = Image.new("RGB", (target_x, target_y))
-    population = makePopulation(things_dict, target_x, target_y, size_settings)
+    population = makePopulation(things_dict, target_x, target_y, population_settings)
     high_score = getTotalDifferenceFunctional(target, canvas)
 
     #Evolution time!
@@ -161,7 +166,7 @@ def evolve(settings):
             population = population[:250]
             new_population = []
             for thing in population:
-                child = mutate(thing, size_settings, mutation_rate)
+                child = mutate(thing, population_settings, mutation_settings)
                 new_population.extend(child)
             population.extend(new_population)
         best_thing = population[0]
@@ -189,13 +194,11 @@ def evolve(settings):
         else:
             generation += 1
         population = []
-        population = makePopulation(things_dict, target_x, target_y, size_settings)
+        population = makePopulation(things_dict, target_x, target_y, population_settings)
 
 
 
 
 
 if __name__ == "__main__":
-    with open('config.json') as settings:
-        config = json.load(settings)
-    evolve(config)
+    evolve()
