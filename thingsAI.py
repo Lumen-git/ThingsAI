@@ -200,10 +200,11 @@ def evolve():
                     gif = Image.open("product.gif")
                     frames = []
                     for frame in ImageSequence.Iterator(gif):
+                        frame = frame.copy()
                         frames.append(frame)
                     frames.append(canvas)
-                    gif.close()
                     frames[0].save('product.gif', save_all=True, append_images=frames[1:])
+                    gif.close()
             thing_image.close()
             generation += 1
         else:
