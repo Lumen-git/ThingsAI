@@ -1,9 +1,9 @@
 {
 "MinSizeMode": false,
-"MinSize": "0.1",
-"MutationRate": "0.3",
-"PopulationSize":"1000",
-"SurvivalRate":"0.25",
-"GenerationCycles":"10",
+"MinSize":0.1,
+"MutationRate":0.3,
+"PopulationSize":1000,
+"SurvivalRate":0.25,
+"GenerationCycles":10,
 "GIF": false
 }
