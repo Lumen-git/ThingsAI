@@ -13,7 +13,7 @@ def makePopulation(thingsDict, main_x_size, main_y_size, settings_bundle):
     print("Making population...")
     population = []
     #Generate a population of 1000 things
-    for i in range(settings_bundle[2]):
+    for i in range(int(settings_bundle[2])):
         #Choose a random image by its ID
         chosen = random.randint(1,len(thingsDict))
         #Generate a thing from the chosen image with random scale and
@@ -71,8 +71,6 @@ def getTotalDifferenceFunctional(image1,image2):
 
 def mutate(parent_thing, settings_bundle, rate):
     #Mutate a thing by changing its scale, position, and rotation by 80% to 120%
-    additions = []
-    i = 0
     thing_copy = deepcopy(parent_thing)
     #Mutations
     if random.uniform(0,1) <= rate: 
@@ -98,14 +96,11 @@ def mutate(parent_thing, settings_bundle, rate):
         if thing_copy.scale < smallest_scale:
             thing_copy.scale = smallest_scale
     #Make sure the scale doesn't make the image 0
+    #This isn't a great solution, but it'll do for now
     if thing_copy.x_size*thing_copy.scale <= 0:
-        img = Image.open(thing_copy.file_path)
-        img.size[0]*thing.scale
-        img.close()
+        thing_copy.scale = 1
     if thing_copy.y_size*thing_copy.scale <= 0:
-        img = Image.open(thing_copy.file_path)
-        img.size[0]*thing.scale
-        img.close() 
+        thing_copy.scale = 1
     return thing_copy
 
 
@@ -119,9 +114,10 @@ def evolve():
     with open('things.pickle', 'rb') as jar:
         things_dict = pickle.load(jar)
     
-    #Make a tuple of the settings required for pop gen and mutation
+    #Save the settings in a way easy to reference
     population_settings = (settings["MinSizeMode"], settings["MinSize"], settings["PopulationSize"])
     mutation_settings = settings["MutationRate"]
+    GIF_settings = settings["GIF"]
 
     #Open target image and make a new canvas of same size
     #then copy it as new_image
@@ -134,6 +130,11 @@ def evolve():
     population = makePopulation(things_dict, target_x, target_y, population_settings)
     high_score = getTotalDifferenceFunctional(target, canvas)
 
+    if GIF_settings:
+        gif = canvas.copy()
+        gif.save("product.gif", save_all=True, duration=100, loop=0)
+        gif.close()
+
     #Evolution time!
     #Enclosed in a while true loop to keep evolving until the user stops the program
     #Each generation will run a population 10 times, and the best one will be added
@@ -143,7 +144,7 @@ def evolve():
     generation = 0
     print("Starting evolution...")
     while True:
-        for i in range(settings["GenerationCycles"]):
+        for i in range(int(settings["GenerationCycles"])):
             print("Generation: " + str(generation) + " Cycle: " + str(i))
             for trial_thing in population:
                 canvas_copy = canvas.copy()
@@ -166,12 +167,12 @@ def evolve():
             #Sort the population by score
             population.sort(key=lambda x: x.getScore())
             #Take first percentage items of the population based on SurvivalRate and save them in population
-            population = population[:len(population)*settings["SurvivalRate"]]
+            population = population[:int(len(population)*float(settings["SurvivalRate"]))]
             new_population = []
             for thing in population:
                 #Certain values of SurvivalRate can cause the population to decrease in size
                 #Its best to use a percentage where 1/SurvivalRate is a whole number
-                for i in range(int(1/settings["SurvivalRate"])-1):
+                for i in range(int(1/float(settings["SurvivalRate"]))-1):
                     child = mutate(thing, population_settings, mutation_settings)
                     new_population.append(child)
             population.extend(new_population)
@@ -195,6 +196,10 @@ def evolve():
                 thing_image = thing_image.rotate(best_thing.rotation, expand=True)
                 canvas.paste(thing_image, (best_thing.x_position, best_thing.y_position), mask=thing_image)
                 canvas.save("product.png")
+                if GIF_settings:
+                    gif = Image.open("product.gif")
+                    gif.save("product.gif", save_all=True, append_images=[canvas] ,duration=100, loop=0)
+                    gif.close()
             thing_image.close()
             generation += 1
         else:
