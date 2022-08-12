@@ -1,6 +1,6 @@
 import pickle
 import random
-from PIL import Image
+from PIL import Image, ImageSequence
 from thingClass import thing
 import math
 from scipy.interpolate import interp1d
@@ -198,8 +198,12 @@ def evolve():
                 canvas.save("product.png")
                 if GIF_settings:
                     gif = Image.open("product.gif")
-                    gif.save("product.gif", save_all=True, append_images=[canvas] ,duration=100, loop=0)
+                    frames = []
+                    for frame in ImageSequence.Iterator(gif):
+                        frames.append(frame)
+                    frames.append(canvas)
                     gif.close()
+                    frames[0].save('product.gif', save_all=True, append_images=frames[1:])
             thing_image.close()
             generation += 1
         else:
