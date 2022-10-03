@@ -1,6 +1,11 @@
 # ThingsAI
 ### Create dynamic mosaics using evolution
 
+<img src="sample.gif" alt="The Mona Lisa recreated using textures from Minecraft"/>
+
+###### The Mona Lisa Recreated using textures from Minecraft
+<br>
+
 ### Requirements
 Most of the requirements come with python or will already be installed in most conda environments, however, all non-standard ones are listed below.
 ```
