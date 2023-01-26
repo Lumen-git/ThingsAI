@@ -55,7 +55,7 @@ def getTotalDifferenceVisual(image1,image2):
     canvasTest.save("difference.png")
     print(total)
 
-def getTotalDifferenceFunctional(image1,image2, sample = 1, sampleToggle=False):
+def getTotalDifferenceFunctional(image1,image2, sample):
     #Get the total difference between two images using numpy
     #This is faster than the previous method by a long shot
     #Amazing how different packages and do the same thing with such different speeds
@@ -63,11 +63,8 @@ def getTotalDifferenceFunctional(image1,image2, sample = 1, sampleToggle=False):
     #206 times faster than getTotalDifferenceVisual
     image1 = image1.convert("RGB")
     image2 = image2.convert("RGB")
-    image1 = numpy.asarray(image1)
-    image2 = numpy.asarray(image2)
-    if sampleToggle:
-        image1 = image1[1::sample]
-        image2 = image2[1::sample]
+    image1 = numpy.asarray(image1)[1::sample]
+    image2 = numpy.asarray(image2)[1::sample]
     #Apparently this does the euclidean difference formula
     differences = numpy.linalg.norm(image1 - image2)
     return differences
@@ -129,9 +126,14 @@ def evolve():
     target = Image.open("target.png")
     target_x = target.size[0]
     target_y = target.size[1]
-    canvas = Image.new("RGB", (target_x, target_y))
+
+    try:
+        canvas = Image.open("product.png")
+    except:
+        canvas = Image.new("RGB", (target_x, target_y))
+
     population = makePopulation(things_dict, target_x, target_y, population_settings)
-    high_score = getTotalDifferenceFunctional(target, canvas)
+    high_score = getTotalDifferenceFunctional(target, canvas, settings["SampleRate"])
 
     if GIF_settings:
         gif = canvas.copy()
@@ -165,7 +167,7 @@ def evolve():
                 canvas_copy.paste(thing_image, (trial_thing.x_position, trial_thing.y_position), mask=thing_image)
                 #Score is calculated by comparing the canvas_copy to the target image and the last canvas
                 #Lower score is better (more similar to target)
-                trial_thing.setScore(getTotalDifferenceFunctional(target, canvas_copy))
+                trial_thing.setScore(getTotalDifferenceFunctional(target, canvas_copy,settings["SampleRate"]))
                 thing_image.close()
             #Sort the population by score
             population.sort(key=lambda x: x.getScore())
@@ -186,7 +188,7 @@ def evolve():
         #Using < because a lower score is better
         #Using -2000 to give the AI a little room to undo some progress
         #In order to make more overall
-        if best_thing.getScore() - 2000 < high_score:
+        if best_thing.getScore() - settings["Backstep"] < high_score:
             high_score = best_thing.getScore()
             thing_image = Image.open(best_thing.file_path)
             #thing_image_mask = thing_image.convert("RGBA")
