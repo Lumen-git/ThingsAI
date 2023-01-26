@@ -55,7 +55,7 @@ def getTotalDifferenceVisual(image1,image2):
     canvasTest.save("difference.png")
     print(total)
 
-def getTotalDifferenceFunctional(image1,image2):
+def getTotalDifferenceFunctional(image1,image2, sample = 1, sampleToggle=False):
     #Get the total difference between two images using numpy
     #This is faster than the previous method by a long shot
     #Amazing how different packages and do the same thing with such different speeds
@@ -65,6 +65,9 @@ def getTotalDifferenceFunctional(image1,image2):
     image2 = image2.convert("RGB")
     image1 = numpy.asarray(image1)
     image2 = numpy.asarray(image2)
+    if sampleToggle:
+        image1 = image1[1::sample]
+        image2 = image2[1::sample]
     #Apparently this does the euclidean difference formula
     differences = numpy.linalg.norm(image1 - image2)
     return differences
