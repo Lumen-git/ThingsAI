@@ -5,7 +5,7 @@
 "PopulationSize":1000,
 "SurvivalRate":0.25,
 "GenerationCycles":10,
-"GIF":false;
-"SampleRate":1;
+"GIF":false,
+"SampleRate":1,
 "Backstep":2000
 }
